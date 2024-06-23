@@ -1,11 +1,12 @@
 import * as express from "express";
 import * as cors from "cors";
 import * as morgan from "morgan";
+import * as http from "http";
 
 import Logs from "./utils/logs";
+import Mysql from "./mysql";
 
 import { environment } from "./environment/environment";
-import Mysql from "./mysql";
 
 export default class App {
 
@@ -18,8 +19,8 @@ export default class App {
     }
 
     private _init(): void {
-        Logs.info(`Api Service start model: ${process.env.NODE_ENV}`);
-        Logs.info(`Api Service Version: ${environment.api_version}`);
+        Logs.info(`Start model: ${process.env.NODE_ENV}`);
+        Logs.info(`Version: ${environment.api_version}`);
         Mysql.init();
     }
 
@@ -36,5 +37,13 @@ export default class App {
 
     private _routes(): void {
 
+    }
+
+    public listen(port: number): void {
+        this._app.set("port", port || 3000);
+        const httpServer = http.createServer(this._app);
+        httpServer.listen(port, () => {
+            Logs.info("HTTP Api Service listening on PORT " + this._app.get("port"));
+        });
     }
 }
