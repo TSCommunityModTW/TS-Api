@@ -1,5 +1,6 @@
 import { Router, Application } from "express";
 import AuthJwtVerify from "../middlewares/authJwtVerify";
+import Logs from "../../utils/logs";
 
 export default abstract class IRoutes {
 
@@ -10,10 +11,12 @@ export default abstract class IRoutes {
         this._routers = Router();
         this._loadRoutes();
 
-        if (routerRoot === undefined) {
+        if (!routerRoot) {
             app.use(this._routers);
+            Logs.info(`Initialized routes: NULL`);
         } else {
             app.use(routerRoot, this._routers);
+            Logs.info(`Initialized routes: ${routerRoot}`);
         }
     }
 

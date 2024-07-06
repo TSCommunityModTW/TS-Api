@@ -12,6 +12,13 @@ export default class LauncherRouter extends IRoutes {
     }
 
     protected _loadRoutes(): void {
+        this._routers.route("/metadata/server/version")
+            .get((req, res) => this._launcherController.getMetadataServerVersion(req, res));
+        this._routers.route("/assets/servers")
+            .get((req, res) => this._launcherController.getAssetsServers(req, res));
+        this._routers.route("/assets/servers/:serverId/childrens")
+            .get((req, res) => this._launcherController.getAssetsServerChildrens(req, res));
 
+        // .get((req, res) => this._launcherController.getAssets(req, res));
     }
 }

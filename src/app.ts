@@ -4,9 +4,11 @@ import * as morgan from "morgan";
 import * as http from "http";
 
 import Logs from "./utils/logs";
-import Mysql from "./mysql";
+import SQL from "./sql";
 
 import { environment } from "./environment/environment";
+
+import LauncherRouter from "./api/routes/launcher.routes";
 
 export default class App {
 
@@ -14,14 +16,16 @@ export default class App {
     private _morganFormat = '[:date[iso]] :remote-addr - :remote-user ":method :url :status :response-time ms';
 
     constructor() {
+        Logs.info(`Start model: ${process.env.NODE_ENV}`);
+        Logs.info(`Version: ${environment.api_version}`);
         this._app = express();
         this._init();
+        this._middleware();
+        this._routes();
     }
 
     private _init(): void {
-        Logs.info(`Start model: ${process.env.NODE_ENV}`);
-        Logs.info(`Version: ${environment.api_version}`);
-        Mysql.init();
+        SQL.init();
     }
 
     private _middleware(): void {
@@ -36,7 +40,7 @@ export default class App {
     }
 
     private _routes(): void {
-
+        new LauncherRouter(this._app);
     }
 
     public listen(port: number): void {

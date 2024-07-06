@@ -12,7 +12,8 @@
     "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
-    "mysql2": "^3.10.1"
+    "mysql2": "^3.10.1",
+    "tslib": "^2.6.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
