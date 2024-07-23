@@ -5,6 +5,7 @@
   "author": "Yu",
   "license": "GPL-3.0",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.616.0",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.5",
@@ -13,7 +14,8 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "mysql2": "^3.10.1",
-    "tslib": "^2.6.3"
+    "tslib": "^2.6.3",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
@@ -21,6 +23,7 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.14.8",
+    "@types/uuid": "^10.0.0",
     "fs-extra": "^11.2.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.5.2"

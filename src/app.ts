@@ -9,6 +9,7 @@ import SQL from "./sql";
 import { environment } from "./environment/environment";
 
 import LauncherRouter from "./api/routes/launcher.routes";
+import S3 from "./s3";
 
 export default class App {
 
@@ -26,11 +27,12 @@ export default class App {
 
     private _init(): void {
         SQL.init();
+        S3.init();
     }
 
     private _middleware(): void {
 
-        if (process.env.NODE_ENV === "production") {
+        if (process.env.NODE_ENV === "development") {
             this._app.use(cors());
         }
 
