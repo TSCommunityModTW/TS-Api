@@ -2,7 +2,8 @@ name: Push Docker Image
 
 on:
   push:
-    branches: [ production ]
+    tags:
+      - "v*.*.*"
     
 jobs:
   push-image-to-docker-hub:
