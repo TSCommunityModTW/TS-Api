@@ -35,12 +35,12 @@ jobs:
         echo ", \"insecure-registries\": [\"${{ env.DOCKER_STORAGE_IP }}\"]}" | sudo tee -a /etc/docker/daemon.json
         sudo systemctl restart docker
 
-    - name: Login to private registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.DOCKER_STORAGE_IP }}
-        username: ${{ secrets.REGISTRY_STORAGE_S3_AUTH_USERNAME }}
-        password: ${{ secrets.REGISTRY_STORAGE_S3_AUTH_PASSWORD }}
+    # - name: Login to private registry
+    #   uses: docker/login-action@v3
+    #   with:
+    #     registry: ${{ env.DOCKER_STORAGE_IP }}
+    #     username: ${{ secrets.REGISTRY_STORAGE_S3_AUTH_USERNAME }}
+    #     password: ${{ secrets.REGISTRY_STORAGE_S3_AUTH_PASSWORD }}
 
     - name: Build the Docker image And Push
       id: firs-docker-pull
