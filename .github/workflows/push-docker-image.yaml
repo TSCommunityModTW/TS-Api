@@ -28,6 +28,11 @@ jobs:
     - name: Set up Docker Buildx
       id: buildx
       uses: docker/setup-buildx-action@v3
+      with:
+          config-inline: |
+            [registry."${{ env.DOCKER_STORAGE_IP }}"]
+              http = true
+              insecure = true
       
     - name: Insecure Docker Repository
       run: |
