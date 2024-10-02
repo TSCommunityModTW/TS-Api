@@ -66,6 +66,16 @@ export default class Logs {
         console.log(`${time}${title}`, message);
     }
 
+    public static debug(message: any) {
+
+        let title: string = "Debug";
+        title = `${this._colours.fg.white}[${this._colours.fg.blue}${title}${this._colours.fg.white}]${this._colours.reset}`;
+        let time = date.fullYearTime();
+        time = `${this._colours.fg.white}[${this._colours.fg.cyan}${date.fullYearTime()}${this._colours.fg.white}]${this._colours.reset}`;
+
+        console.log(`${time}${title}`, message);
+    }
+
     // writeLogFile(logText: string) {
 
     // }

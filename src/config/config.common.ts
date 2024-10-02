@@ -1,6 +1,6 @@
 import { API_VERSION } from "../version";
 
-export const environment = {
+export const configCommon = {
     api_version: API_VERSION,
     jwt: {
         increaseTime: 600000

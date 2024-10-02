@@ -1,6 +1,6 @@
 import "dotenv/config";
 
 import App from "./app";
-import { environment } from "./environment/environment";
+import { config } from "./config/config";
 
-new App().listen(environment.port);
+new App().listen(config.port);
