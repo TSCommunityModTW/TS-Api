@@ -20,6 +20,16 @@ export default class LauncherController {
 
     // }
 
+    public async getMetadataAssetsServers(request: Request, response: Response): Promise<void> {
+        try {
+            const data = await this._launcherService.getMetadataAssetsServers();
+            response.status(200).json(data);
+        } catch (error) {
+            Logs.error(error);
+            ReplyError.replyServerError(response);
+        }
+    }
+
     public async getAssetsServers(request: Request, response: Response): Promise<void> {
         try {
             const data = await this._launcherService.getAssetsServers();
@@ -170,6 +180,21 @@ export default class LauncherController {
 
         try {
             const data = await this._launcherService.getAssetsMetadataServerVersions(childrenId);
+            response.status(200).json(data);
+        } catch (error) {
+            Logs.error(error);
+            ReplyError.replyServerError(response);
+        }
+    }
+
+    public async getAssetsMetadataVersionMetadata(request: Request, response: Response): Promise<void> {
+
+        const serverId = request.params.serverId;
+        const childrenId = request.params.childrenId;
+        const version = request.params.version;
+
+        try {
+            const data = await this._launcherService.getAssetsMetadataVersionMetadata(serverId, childrenId, version);
             response.status(200).json(data);
         } catch (error) {
             Logs.error(error);

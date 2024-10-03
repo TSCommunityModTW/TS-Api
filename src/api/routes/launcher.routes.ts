@@ -14,6 +14,8 @@ export default class LauncherRouter extends IRoutes {
     protected _loadRoutes(): void {
         // this._routers.route("/metadata/server/version")
         //     .get((req, res) => this._launcherController.getMetadataServerVersion(req, res));
+        this._routers.route("/assets/metadata/servers")
+            .get((req, res) => this._launcherController.getMetadataAssetsServers(req, res));
         this._routers.route("/assets/servers")
             .get((req, res) => this._launcherController.getAssetsServers(req, res));
         this._routers.route("/assets/servers/:serverId")
@@ -31,7 +33,8 @@ export default class LauncherRouter extends IRoutes {
         // .post(this._authJwtVerify.verifyToken, (req, res) => this._launcherController.uploadModpack(req, res));
         this._routers.route("/assets/metadata/:childrenId/versions")
             .get((req, res) => this._launcherController.getAssetsMetadataServerVersions(req, res));
-
+        this._routers.route("/assets/metadata/:serverId/:childrenId/version_metadata/:version")
+            .get((req, res) => this._launcherController.getAssetsMetadataVersionMetadata(req, res));
         // .get((req, res) => this._launcherController.getAssets(req, res));
     }
 }

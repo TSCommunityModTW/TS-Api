@@ -1,17 +1,15 @@
 import got from "got";
 import * as admZip from "adm-zip";
 import Logs from "../utils/logs";
-import { Semaphore } from "async-mutex";
 import S3 from "../s3";
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import Api from "./Api";
 import { Socket } from "socket.io";
-import * as crypto from "crypto-js";
 import SQL from "../sql";
 import { RowDataPacket } from "mysql2";
 import { v4 as uuidv4 } from "uuid";
-
-const s3RootUrl = "http://s3api.tshosts.com:9800/ts-launcher-metadata";
+import { config } from "../config/config";
+import * as crypto from "crypto";
 
 export class Homemade {
 
@@ -87,12 +85,12 @@ export class Homemade {
                         Logs.error(log);
                     });
 
-                let hash: crypto.lib.WordArray | undefined;
+                let hash: string = "";
 
                 try {
-                    hash = crypto.SHA256(buffer.toString());
+                    hash = crypto.createHash("sha1").update(buffer).digest("hex");
                 } catch (err) {
-                    const log = `Failed to generate a SHA256 hash for ${fileKey}: ${err}`;
+                    const log = `Failed to generate a SHA1 hash for ${fileKey}: ${err}`;
                     this._socket.emit("LAUNCHET_SERVER_FILE_REPLY_LOG", { type: "ERROR", messages: log });
                     Logs.error(log);
                 }
@@ -103,10 +101,10 @@ export class Homemade {
                     projectId: mod.projectId,
                     fileId: mod.fileId,
                     platform: mod.platform,
-                    downloadUrl: `${s3RootUrl}/${fileKey}`,
+                    downloadUrl: encodeURI(`${config.s3_ts_launcher_metadata_url}/${fileKey}`),
                     installPath: `mods/${mod.fileName}`,
                     size: buffer.byteLength,
-                    hash: hash ? hash.toString() : ""
+                    hash
                 });
 
                 filesAllSize += buffer.byteLength;
@@ -138,12 +136,12 @@ export class Homemade {
                             Logs.error(log);
                         });
 
-                    let hash: crypto.lib.WordArray | undefined;
+                    let hash: string = "";
 
                     try {
-                        hash = crypto.SHA256(buffer.toString());
+                        hash = crypto.createHash("sha1").update(buffer).digest("hex");
                     } catch (err) {
-                        const log = `Failed to generate a SHA256 hash for ${fileKey}: ${err}`;
+                        const log = `Failed to generate a SHA1 hash for ${fileKey}: ${err}`;
                         this._socket.emit("LAUNCHET_SERVER_FILE_REPLY_LOG", { type: "ERROR", messages: log });
                         Logs.error(log);
                     }
@@ -151,13 +149,26 @@ export class Homemade {
                     files.push({
                         name: entry.name,
                         fileName: entry.name,
-                        downloadUrl: `${s3RootUrl}/${fileKey}`,
+                        downloadUrl: encodeURI(`${config.s3_ts_launcher_metadata_url}/${fileKey}`),
                         installPath: entry.entryName.replace("overrides/", ""),
                         size: buffer.byteLength,
-                        hash: hash ? hash.toString() : ""
+                        hash
                     });
 
                     filesAllSize += buffer.byteLength;
+                }
+            }
+
+            const getModLoaderType = () => {
+                if (manifest.modLoaderId.split("-")[0].toLowerCase() === "forge") {
+                    return "Forge";
+                } else if (manifest.modLoaderId.split("-")[0].toLowerCase() === "fabric") {
+                    return "Fabric";
+                } else {
+                    throw {
+                        error: "Unknown manifest type",
+                        error_description: "Unknown manifest modloader type."
+                    }
                 }
             }
 
@@ -167,6 +178,13 @@ export class Homemade {
                 size: filesAllSize,
                 serverId: data.serverId,
                 childrenServerId: data.childrenId,
+                minecraft: {
+                    version: manifest.minecraftVersion
+                },
+                modloader: {
+                    type: getModLoaderType(),
+                    version: manifest.modLoaderId.split("-")[1]
+                },
                 files: files
             }
             const versionManifestKey = `assets/game_files/${data.serverId}/${data.childrenId}/${this._version}/version_manifest.json`;
@@ -186,7 +204,7 @@ export class Homemade {
             if (metadateRows.length === 0) {
                 await SQL.pool().query("INSERT INTO `assets_metadata` SET ?", [assets_metadata_body]);
             } else {
-                await SQL.pool().query("UPDATE `assets_metadata` SET latest = ? WHERE server_id = ? AND children_id = ?", [this._version, data.serverId, data.childrenId]);
+                await SQL.pool().query("UPDATE `assets_metadata` SET latest = ?, version = ? WHERE server_id = ? AND children_id = ?", [this._version, this._version, data.serverId, data.childrenId]); // TODO
             }
             const [metadateVersionRows] = await SQL.pool().query<IAssetsMetadataVersion[]>("SELECT * FROM `assets_metadata_versions` WHERE children_id = ? AND version = ?", [data.childrenId, this._version]);
             const assets_metadata_versions_body = {
@@ -195,13 +213,13 @@ export class Homemade {
                 children_id: data.childrenId,
                 name: this._name,
                 version: this._version,
-                manifest_url: `${s3RootUrl}/${versionManifestKey}`
+                manifest_url: `${config.s3_ts_launcher_metadata_url}/${versionManifestKey}`
             }
             if (metadateVersionRows.length === 0) {
                 await SQL.pool().query("INSERT INTO `assets_metadata_versions` SET ?", [assets_metadata_versions_body]);
             } else {
                 // TODO: TEST 有需要嗎？
-                await SQL.pool().query("UPDATE `assets_metadata_versions` SET manifest_url = ?", [`${s3RootUrl}/${versionManifestKey}`]);
+                await SQL.pool().query("UPDATE `assets_metadata_versions` SET manifest_url = ?", [`${config.s3_ts_launcher_metadata_url}/${versionManifestKey}`]);
             }
 
             //* Remove s3 metadata temporary modpacks object
@@ -263,6 +281,7 @@ async function parseManifest(manifestjsonData: IManifestJson, socket?: Socket) {
     return {
         mods: mods,
         modLoaderId: manifestjsonData.minecraft.modLoaders[0].id,
+        minecraftVersion: manifestjsonData.minecraft.version,
         errorModIds: errorModIds
     }
 }
@@ -328,12 +347,19 @@ interface IManifestJson {
     }>
 }
 
-interface IVersionManifest {
+export interface IVersionManifest {
     version: string;
     name: string;
     size: number;
     serverId: string;
     childrenServerId: string;
+    minecraft: {
+        version: string;
+    };
+    modloader: {
+        type: "Forge" | "Fabric",
+        version: string;
+    }
     files: Array<IVersionManifestFile>
 }
 
