@@ -143,7 +143,7 @@ export default class LauncherService {
         const fileKey = `/server/images/logo/${bodyData.serveId}/${uuidv4()}`;
 
         const uploadParams = {
-            Bucket: config.s3_ts_launcher_metadata_bucket,
+            Bucket: config.s3.ts_launcher_metadata_bucket,
             Key: fileKey,
             Body: bodyData.data
         };
@@ -165,7 +165,7 @@ export default class LauncherService {
             const upload = new Upload({
                 client: S3.client(),
                 params: {
-                    Bucket: config.s3_ts_launcher_metadata_bucket,
+                    Bucket: config.s3.ts_launcher_metadata_bucket,
                     Key: fileKey,
                     Body: file.data,
                 },

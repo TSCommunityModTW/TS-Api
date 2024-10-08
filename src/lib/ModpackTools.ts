@@ -101,7 +101,7 @@ export class Homemade {
                     projectId: mod.projectId,
                     fileId: mod.fileId,
                     platform: mod.platform,
-                    downloadUrl: encodeURI(`${config.s3_ts_launcher_metadata_url}/${fileKey}`),
+                    downloadUrl: encodeURI(`${config.s3.ts_launcher_metadata_url}/${fileKey}`),
                     installPath: `mods/${mod.fileName}`,
                     size: buffer.byteLength,
                     hash
@@ -149,7 +149,7 @@ export class Homemade {
                     files.push({
                         name: entry.name,
                         fileName: entry.name,
-                        downloadUrl: encodeURI(`${config.s3_ts_launcher_metadata_url}/${fileKey}`),
+                        downloadUrl: encodeURI(`${config.s3.ts_launcher_metadata_url}/${fileKey}`),
                         installPath: entry.entryName.replace("overrides/", ""),
                         size: buffer.byteLength,
                         hash
@@ -195,16 +195,18 @@ export class Homemade {
                 ContentType: "application/json"
             }));
 
-            const [metadateRows] = await SQL.pool().query<IAssetsMetadata[]>("SELECT * FROM `assets_metadata` WHERE server_id = ?", [data.serverId]);
-            const assets_metadata_body = {
-                server_id: data.serverId,
-                children_id: data.childrenId,
-                latest: this._version
-            }
+            const [metadateRows] = await SQL.pool().query<IAssetsMetadata[]>("SELECT * FROM `assets_metadata` WHERE server_id = ? AND children_id = ?", [data.serverId, data.childrenId]);
             if (metadateRows.length === 0) {
+                const assets_metadata_body = {
+                    id: uuidv4().split("-")[0],
+                    server_id: data.serverId,
+                    children_id: data.childrenId,
+                    latest: this._version,
+                    version: this._version // TODO: 暫時使用相同的 value
+                }
                 await SQL.pool().query("INSERT INTO `assets_metadata` SET ?", [assets_metadata_body]);
             } else {
-                await SQL.pool().query("UPDATE `assets_metadata` SET latest = ?, version = ? WHERE server_id = ? AND children_id = ?", [this._version, this._version, data.serverId, data.childrenId]); // TODO
+                await SQL.pool().query("UPDATE `assets_metadata` SET latest = ?, version = ? WHERE server_id = ? AND children_id = ?", [this._version, this._version, data.serverId, data.childrenId]); // TODO: version 暫時使用相同的 value
             }
             const [metadateVersionRows] = await SQL.pool().query<IAssetsMetadataVersion[]>("SELECT * FROM `assets_metadata_versions` WHERE children_id = ? AND version = ?", [data.childrenId, this._version]);
             const assets_metadata_versions_body = {
@@ -213,13 +215,13 @@ export class Homemade {
                 children_id: data.childrenId,
                 name: this._name,
                 version: this._version,
-                manifest_url: `${config.s3_ts_launcher_metadata_url}/${versionManifestKey}`
+                manifest_url: `${config.s3.ts_launcher_metadata_url}/${versionManifestKey}`
             }
             if (metadateVersionRows.length === 0) {
                 await SQL.pool().query("INSERT INTO `assets_metadata_versions` SET ?", [assets_metadata_versions_body]);
             } else {
                 // TODO: TEST 有需要嗎？
-                await SQL.pool().query("UPDATE `assets_metadata_versions` SET manifest_url = ?", [`${config.s3_ts_launcher_metadata_url}/${versionManifestKey}`]);
+                await SQL.pool().query("UPDATE `assets_metadata_versions` SET manifest_url = ?", [`${config.s3.ts_launcher_metadata_url}/${versionManifestKey}`]);
             }
 
             //* Remove s3 metadata temporary modpacks object
@@ -302,9 +304,11 @@ function flxCurseforgeDownloadUrlNullIssues(fileId: number, fileName: string, so
 }
 
 interface IAssetsMetadata extends RowDataPacket {
+    id: string;
     server_id: string;
     children_id: string;
     latest: string;
+    version: string;
 }
 
 interface IAssetsMetadataVersion extends RowDataPacket {
