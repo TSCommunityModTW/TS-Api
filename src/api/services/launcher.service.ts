@@ -16,8 +16,6 @@ export default class LauncherService {
 
     public async getAssetsMetadataVersionMetadata(serverId: string, childrenId: string, version: string): Promise<IVersionManifest> {
         const [assetsMetadataVersionRow] = await SQL.pool().query<IAssetsMetadataVersionRow[]>("SELECT * FROM assets_metadata_versions WHERE server_id = ? AND children_id = ? AND version = ?", [serverId, childrenId, version]);
-        console.log(assetsMetadataVersionRow[0].manifest_url);
-
         return await got.get(assetsMetadataVersionRow[0].manifest_url).json<IVersionManifest>();
     }
 

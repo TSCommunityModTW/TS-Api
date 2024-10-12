@@ -10,8 +10,6 @@ export default class AuthController {
 
         const bodyData: IOAuth2 = request.body;
 
-        console.log(bodyData);
-
         // 確保客戶端必要的參數
         if (!this._verifyRequest(bodyData)) {
             response.status(400).json({
