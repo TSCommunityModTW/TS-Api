@@ -54,10 +54,9 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ env.DOCKER_STORAGE_IP }}/${{ env.IMAGE }}:latest
-        # tags: |
-        #   ${{ env.DOCKER_STORAGE_IP }}/${{ env.IMAGE }}:latest
-        #   ${{ env.DOCKER_STORAGE_IP }}/${{ env.IMAGE }}:${{ steps.package-version.outputs.current-version }}
+        tags: |
+          ${{ env.DOCKER_STORAGE_IP }}/${{ env.IMAGE }}:latest
+          ${{ env.DOCKER_STORAGE_IP }}/${{ env.IMAGE }}:${{ steps.package-version.outputs.current-version }}
       continue-on-error: true
 
     - name: Retry again on failure Build the Docker image And Push
@@ -67,10 +66,9 @@ jobs:
       with:
         context: .
         push: true
-        tags: ${{ env.DOCKER_STORAGE_IP }}/${{ env.IMAGE }}:latest
-        # tags: |
-        #   ${{ env.DOCKER_STORAGE_IP }}/${{ env.IMAGE }}:latest
-        #   ${{ env.DOCKER_STORAGE_IP }}/${{ env.IMAGE }}:${{ steps.package-version.outputs.current-version }}
+        tags: |
+          ${{ env.DOCKER_STORAGE_IP }}/${{ env.IMAGE }}:latest
+          ${{ env.DOCKER_STORAGE_IP }}/${{ env.IMAGE }}:${{ steps.package-version.outputs.current-version }}
 
 #    - name: Invoke deployment hook
 #      uses: distributhor/workflow-webhook@v2

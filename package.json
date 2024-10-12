@@ -1,6 +1,6 @@
 {
   "name": "ts-api",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "main": "./release/index.js",
   "author": "Yu",
   "license": "GPL-3.0",
