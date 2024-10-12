@@ -11,7 +11,7 @@ jobs:
 
     env:
       IMAGE: ts-api
-      DOCKER_STORAGE_IP: 220.135.78.200:9041
+      DOCKER_STORAGE_IP: https://registry.tshosts.com
       
     steps:
     
